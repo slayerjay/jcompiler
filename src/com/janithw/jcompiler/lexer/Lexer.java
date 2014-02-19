@@ -12,7 +12,7 @@ public class Lexer {
 	private int cPos = 0;
 	private char peek = ' ';
 
-	private Hashtable words = new Hashtable();
+	private Hashtable<String, Id> words = new Hashtable<String, Id>();
 	
 	public Lexer(InputStream in) {
 		this.reader = in;
@@ -49,7 +49,7 @@ public class Lexer {
 		//Handle reserved words and identifiers
 		if (Character.isLetter(peek)) {
 			String str = getString();
-			Id id = (Id) words.get(str);
+			Id id = words.get(str);
 			if (id != null) {
 				return id;
 			}
