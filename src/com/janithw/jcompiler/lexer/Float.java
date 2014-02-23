@@ -1,6 +1,6 @@
 package com.janithw.jcompiler.lexer;
 
-public class Float extends Token {
+public class Float extends Token implements ValuedToken{
 
 	private float val;
 	
@@ -14,7 +14,7 @@ public class Float extends Token {
 		return String.valueOf(val);
 	}
 
-	public float getVal() {
+	public Object getVal() {
 		return val;
 	}
 

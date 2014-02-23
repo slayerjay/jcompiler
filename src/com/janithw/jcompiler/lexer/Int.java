@@ -1,6 +1,6 @@
 package com.janithw.jcompiler.lexer;
 
-public class Int extends Token {
+public class Int extends Token implements ValuedToken {
 	
 	private int val;
 
@@ -14,7 +14,7 @@ public class Int extends Token {
 		return String.valueOf(val);
 	}
 
-	public int getVal() {
+	public Object getVal() {
 		return val;
 	}
 

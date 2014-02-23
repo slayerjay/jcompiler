@@ -1,6 +1,6 @@
 package com.janithw.jcompiler.lexer;
 
-public class Id extends Token {
+public class Id extends Token implements ValuedToken{
 
 	public final String lexeme;
 	public Object val;

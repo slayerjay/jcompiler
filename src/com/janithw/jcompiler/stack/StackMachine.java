@@ -1,9 +1,9 @@
 package com.janithw.jcompiler.stack;
 
 import com.janithw.jcompiler.lexer.Float;
-import com.janithw.jcompiler.lexer.Id;
 import com.janithw.jcompiler.lexer.Int;
 import com.janithw.jcompiler.lexer.Token;
+import com.janithw.jcompiler.lexer.ValuedToken;
 
 public class StackMachine {
 
@@ -18,34 +18,37 @@ public class StackMachine {
 	}
 
 	public void evaluate(char op) {
-		//No type checking yet. Everything is float
-		Token num1 = stack.pop();
-		Token num2 = stack.pop();
-		float n1 = getVal(num1), n2 = getVal(num2);
-		float ans = 0;
-		if (op == '+') {
-			ans = n1 + n2;
-		} else if (op == '*') {
-			ans = n1 * n2;
+		ValuedToken num1 = (ValuedToken) stack.pop();
+		ValuedToken num2 = (ValuedToken) stack.pop();
+		if(num1.getVal() instanceof java.lang.Float || num2.getVal() instanceof java.lang.Float){
+			float ans = 0;
+			if (op == '+') {
+				ans = getFloat(num1)+getFloat(num2);
+			} else if (op == '*') {
+				ans = getFloat(num1)*getFloat(num2);
+			}
+			stack.push(new Float(ans));
+		}else{
+			int ans = 0;
+			if (op == '+') {
+				ans = getInt(num1)+getInt(num2);
+			} else if (op == '*') {
+				ans = getInt(num1)*getInt(num2);
+			}
+			stack.push(new Int(ans));
 		}
-		stack.push(new Float(ans));
+		
 	}
 
-	private float getVal(Token num) {
-		if (num instanceof Int) {
-			return ((Int) num).getVal();
-		}
-		if (num instanceof Float) {
-			return ((Float) num).getVal();
-		}
-		if(num instanceof Id){
-			return java.lang.Float.parseFloat(((Id) num).getVal().toString());
-		}
-		return (float) 0.0;
-
+	private float getFloat(ValuedToken num) {
+		return java.lang.Float.parseFloat(num.getVal().toString());
+	}
+	
+	private int getInt(ValuedToken num) {
+		return Integer.parseInt(num.getVal().toString());
 	}
 
 	public Object getCurrentValue(){
-		return getVal(stack.peek());
+		return ((ValuedToken)stack.peek()).getVal();
 	}
 }
