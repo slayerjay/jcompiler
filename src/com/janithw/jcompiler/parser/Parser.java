@@ -21,9 +21,11 @@ package com.janithw.jcompiler.parser;
 
 import java.io.IOException;
 
+import com.janithw.jcompiler.lexer.Id;
 import com.janithw.jcompiler.lexer.Lexer;
 import com.janithw.jcompiler.lexer.Tag;
 import com.janithw.jcompiler.lexer.Token;
+import com.janithw.jcompiler.stack.StackMachine;
 
 public class Parser {
 
@@ -32,10 +34,13 @@ public class Parser {
 	private Token lookahead;
 	
 	private StringBuffer postfixBuffer;
+	
+	private StackMachine stackMachine;
 
 	public Parser(Lexer scanner) throws IOException {
 		this.scanner = scanner;
 		postfixBuffer = new StringBuffer();
+		stackMachine = new StackMachine();
 		scanNext();
 	}
 
@@ -114,10 +119,13 @@ public class Parser {
 
 	private void S() throws IOException {
 		postfixBuffer = new StringBuffer();
+		stackMachine = new StackMachine();
 		if (lookahead.tag() == Tag.ID) {
+			Id id = (Id)lookahead;
 			match(Tag.ID);
 			match('=');
 			E();
+			id.setVal(stackMachine.getCurrentValue());
 		} else if (lookahead.tag() == '(' || lookahead.tag() == Tag.INT
 				|| lookahead.tag() == Tag.FLOAT) {
 			E();
@@ -125,6 +133,7 @@ public class Parser {
 			error("Syntax Error");
 		}
 		System.out.println(postfixBuffer.toString());
+		System.out.println("Value: "+stackMachine.getCurrentValue());
 	}
 
 	private void L1() throws IOException {
@@ -158,14 +167,17 @@ public class Parser {
 			break;
 		case Tag.INT:
 			postfixBuffer.append(lookahead);
+			stackMachine.push(lookahead);
 			match(Tag.INT);
 			break;
 		case Tag.FLOAT:
 			postfixBuffer.append(lookahead);
+			stackMachine.push(lookahead);
 			match(Tag.FLOAT);
 			break;
 		case Tag.ID:
 			postfixBuffer.append(lookahead);
+			stackMachine.push(lookahead);
 			match(Tag.ID);
 			break;
 		default:
@@ -179,6 +191,7 @@ public class Parser {
 			match('*');
 			F();
 			postfixBuffer.append('*');
+			stackMachine.evaluate('*');
 			T1();
 		} else {
 
@@ -191,6 +204,7 @@ public class Parser {
 			match('+');
 			T();
 			postfixBuffer.append('+');
+			stackMachine.evaluate('+');
 			T1();
 		} else {
 

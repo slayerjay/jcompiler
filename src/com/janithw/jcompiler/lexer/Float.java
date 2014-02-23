@@ -14,4 +14,8 @@ public class Float extends Token {
 		return String.valueOf(val);
 	}
 
+	public float getVal() {
+		return val;
+	}
+
 }

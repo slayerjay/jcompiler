@@ -13,4 +13,9 @@ public class Int extends Token {
 	public String toString() {
 		return String.valueOf(val);
 	}
+
+	public int getVal() {
+		return val;
+	}
+
 }
