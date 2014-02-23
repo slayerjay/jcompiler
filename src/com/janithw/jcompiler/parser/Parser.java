@@ -25,22 +25,27 @@ import com.janithw.jcompiler.lexer.Id;
 import com.janithw.jcompiler.lexer.Lexer;
 import com.janithw.jcompiler.lexer.Tag;
 import com.janithw.jcompiler.lexer.Token;
+import com.janithw.jcompiler.lexer.Type;
 import com.janithw.jcompiler.stack.StackMachine;
+import com.janithw.jcompiler.symbols.Env;
 
 public class Parser {
 
 	private Lexer scanner;
 
 	private Token lookahead;
-	
+
 	private StringBuffer postfixBuffer;
-	
+
 	private StackMachine stackMachine;
+
+	private Env env;
 
 	public Parser(Lexer scanner) throws IOException {
 		this.scanner = scanner;
 		postfixBuffer = new StringBuffer();
 		stackMachine = new StackMachine();
+		env = new Env(null);
 		scanNext();
 	}
 
@@ -57,8 +62,14 @@ public class Parser {
 	}
 
 	private void error(String string) {
-		throw new RuntimeException(string);
+		System.err.println("Error: Line: " + scanner.getCurrentLine()
+				+ " Col: " + scanner.getCurrentPosition() + ": " + string);
+		System.exit(1);
+	}
 
+	private void warn(String string) {
+		System.out.println("Warning: Line: " + scanner.getCurrentLine()
+				+ " Col: " + scanner.getCurrentPosition() + ": " + string);
 	}
 
 	public void P() throws IOException {
@@ -67,34 +78,42 @@ public class Parser {
 	}
 
 	private void D() throws IOException {
-		B();
-		N();
+		Type type = B();
+		N(type);
 		match(';');
 		D1();
 
 	}
 
-	private void B() throws IOException {
+	private Type B() throws IOException {
+		Type type = null;
 		if (lookahead.tag() == Tag.INT_KEYWORD) {
+			type = (Type) lookahead;
 			match(Tag.INT_KEYWORD);
 		} else if (lookahead.tag() == Tag.FLOAT_KEYWORD) {
+			type = (Type) lookahead;
 			match(Tag.FLOAT_KEYWORD);
 		} else {
 			error("Syntax Error");
 		}
+		return type;
 
 	}
 
-	private void N() throws IOException {
+	private void N(Type type) throws IOException {
+		((Id) lookahead).setType(type.getLexeme());
+		env.put(lookahead, (Id) lookahead);
 		match(Tag.ID);
-		N1();
+		N1(type);
 	}
 
-	private void N1() throws IOException {
+	private void N1(Type type) throws IOException {
 		if (lookahead.tag() == ',') {
 			match(',');
+			((Id) lookahead).setType(type.getLexeme());
+			env.put(lookahead, (Id) lookahead);
 			match(Tag.ID);
-			N1();
+			N1(type);
 		} else {
 			// empty string
 		}
@@ -121,11 +140,20 @@ public class Parser {
 		postfixBuffer = new StringBuffer();
 		stackMachine = new StackMachine();
 		if (lookahead.tag() == Tag.ID) {
-			Id id = (Id)lookahead;
+			Id id = (Id) lookahead;
 			match(Tag.ID);
 			match('=');
 			E();
-			id.setVal(stackMachine.getCurrentValue());
+			if (!id.getType().equals(stackMachine.getCurrentType())) {
+				if ("int".equals(id.getType())) { // id is int, trying to assign
+													// float
+					error("Type mismatch (Narrowing conversion) float to int");
+				} else { // id is float, trying to assign int.
+					warn("Type mismatch (Widening conversion) int to float");
+				}
+			}
+			id.setVal(stackMachine.getCurrentValue(),
+					stackMachine.getCurrentType());
 		} else if (lookahead.tag() == '(' || lookahead.tag() == Tag.INT
 				|| lookahead.tag() == Tag.FLOAT) {
 			E();
@@ -133,7 +161,6 @@ public class Parser {
 			error("Syntax Error");
 		}
 		System.out.println(postfixBuffer.toString());
-		System.out.println("Value: "+stackMachine.getCurrentValue());
 	}
 
 	private void L1() throws IOException {
@@ -143,19 +170,16 @@ public class Parser {
 		} else {
 
 		}
-
 	}
 
 	private void E() throws IOException {
 		T();
 		E1();
-
 	}
 
 	private void T() throws IOException {
 		F();
 		T1();
-
 	}
 
 	private void F() throws IOException {
@@ -211,5 +235,11 @@ public class Parser {
 		}
 
 	}
+
+	public Env getEnv() {
+		return env;
+	}
+	
+	
 
 }

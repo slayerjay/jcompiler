@@ -18,4 +18,11 @@ public class Float extends Token implements ValuedToken{
 		return val;
 	}
 
+	@Override
+	public String getType() {
+		return "float";
+	}
+	
+	
+
 }

@@ -108,4 +108,12 @@ public class Lexer {
 		cPos++;
 	}
 
+	public int getCurrentLine() {
+		return line;
+	}
+
+	public int getCurrentPosition() {
+		return cPos;
+	}
+
 }

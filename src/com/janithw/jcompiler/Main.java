@@ -17,6 +17,7 @@ public class Main {
 		Lexer scanner = new Lexer(System.in);
 		Parser parser = new Parser(scanner);
 		parser.P();
+		System.out.println(parser.getEnv());
 //		
 //		while(true){
 //			Token nextToken = scanner.scan();

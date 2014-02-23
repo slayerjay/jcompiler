@@ -18,4 +18,9 @@ public class Int extends Token implements ValuedToken {
 		return val;
 	}
 
+	@Override
+	public String getType() {
+		return "int";
+	}
+
 }

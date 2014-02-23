@@ -51,4 +51,15 @@ public class StackMachine {
 	public Object getCurrentValue(){
 		return ((ValuedToken)stack.peek()).getVal();
 	}
+	
+	public String getCurrentType(){
+		if(getCurrentValue() instanceof Integer){
+			return "int";
+		}else if(getCurrentValue() instanceof java.lang.Float){
+			return "float";
+		}else{
+			//Shouldnt come here
+			throw new RuntimeException("Type conversion error");
+		}
+	}
 }
