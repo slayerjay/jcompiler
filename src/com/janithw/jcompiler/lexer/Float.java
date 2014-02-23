@@ -8,5 +8,10 @@ public class Float extends Token {
 		super(Tag.FLOAT);
 		this.val = val;
 	}
+	
+	@Override
+	public String toString() {
+		return String.valueOf(val);
+	}
 
 }

@@ -1,5 +1,24 @@
 package com.janithw.jcompiler.parser;
 
+/**
+ * Parser's CFG and the related SDT scheme
+ * P -> D L
+ * D -> B N ; D1
+ * D1-> D | epsilon
+ * B -> int | float
+ * N -> id N1
+ * N1-> , id N1 | epsilon
+ * L -> S ; L1
+ * L1-> L | epsilon
+ * S -> id = E | E
+ * E -> T E1
+ * E1-> + T {print('+')} T1 | epsilon		
+ * T -> F T1
+ * T1-> * F {print('*')} T1 | epsilon
+ * F -> (E) | num {print(num)} | id {print(id)}
+ * 
+ */
+
 import java.io.IOException;
 
 import com.janithw.jcompiler.lexer.Lexer;
@@ -11,9 +30,12 @@ public class Parser {
 	private Lexer scanner;
 
 	private Token lookahead;
+	
+	private StringBuffer postfixBuffer;
 
 	public Parser(Lexer scanner) throws IOException {
 		this.scanner = scanner;
+		postfixBuffer = new StringBuffer();
 		scanNext();
 	}
 
@@ -91,6 +113,7 @@ public class Parser {
 	}
 
 	private void S() throws IOException {
+		postfixBuffer = new StringBuffer();
 		if (lookahead.tag() == Tag.ID) {
 			match(Tag.ID);
 			match('=');
@@ -101,6 +124,7 @@ public class Parser {
 		} else {
 			error("Syntax Error");
 		}
+		System.out.println(postfixBuffer.toString());
 	}
 
 	private void L1() throws IOException {
@@ -133,12 +157,15 @@ public class Parser {
 			match(')');
 			break;
 		case Tag.INT:
+			postfixBuffer.append(lookahead);
 			match(Tag.INT);
 			break;
 		case Tag.FLOAT:
+			postfixBuffer.append(lookahead);
 			match(Tag.FLOAT);
 			break;
 		case Tag.ID:
+			postfixBuffer.append(lookahead);
 			match(Tag.ID);
 			break;
 		default:
@@ -151,6 +178,7 @@ public class Parser {
 		if (lookahead.tag() == '*') {
 			match('*');
 			F();
+			postfixBuffer.append('*');
 			T1();
 		} else {
 
@@ -162,6 +190,7 @@ public class Parser {
 		if (lookahead.tag() == '+') {
 			match('+');
 			T();
+			postfixBuffer.append('+');
 			T1();
 		} else {
 

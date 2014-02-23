@@ -12,5 +12,10 @@ public class Id extends Token {
 	public String getLexeme() {
 		return lexeme;
 	}
+	
+	@Override
+	public String toString() {
+		return getLexeme();
+	}
 
 }

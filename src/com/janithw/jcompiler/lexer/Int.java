@@ -9,4 +9,8 @@ public class Int extends Token {
 		this.val = val;
 	}
 
+	@Override
+	public String toString() {
+		return String.valueOf(val);
+	}
 }
