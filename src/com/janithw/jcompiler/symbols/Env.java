@@ -2,7 +2,7 @@ package com.janithw.jcompiler.symbols;
 
 import java.util.Hashtable;
 
-import com.janithw.jcompiler.lexer.Id;
+import com.janithw.jcompiler.inter.Id;
 import com.janithw.jcompiler.lexer.Token;
 
 
@@ -35,7 +35,7 @@ public class Env {
 		StringBuffer sb = new StringBuffer();
 		for (Token token : table.keySet()) {
 			Id id = table.get(token);
-			sb.append(id.getLexeme()).append("\t").append(id.getType()).append("\t").append(id.getVal()).append("\n");
+			sb.append(id.getToken()).append("\t").append(id.getType()).append("\t").append(id.getVal()).append("\n");
 		}
 		return sb.toString();
 	}

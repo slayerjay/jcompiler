@@ -4,6 +4,6 @@ public interface ValuedToken {
 	
 	public Object getVal();
 	
-	public String getType();
+	public Type getType();
 
 }

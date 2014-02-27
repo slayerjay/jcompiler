@@ -19,8 +19,8 @@ public class Float extends Token implements ValuedToken{
 	}
 
 	@Override
-	public String getType() {
-		return "float";
+	public Type getType() {
+		return Type.FloatType;
 	}
 	
 	

@@ -11,4 +11,9 @@ public class Token {
 	public int tag() {
 		return tag;
 	}
+	
+	@Override
+	public String toString() {
+		return String.valueOf((char)tag);
+	}
 }

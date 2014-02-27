@@ -3,6 +3,7 @@ package com.janithw.jcompiler.stack;
 import com.janithw.jcompiler.lexer.Float;
 import com.janithw.jcompiler.lexer.Int;
 import com.janithw.jcompiler.lexer.Token;
+import com.janithw.jcompiler.lexer.Type;
 import com.janithw.jcompiler.lexer.ValuedToken;
 
 public class StackMachine {
@@ -52,11 +53,11 @@ public class StackMachine {
 		return ((ValuedToken)stack.peek()).getVal();
 	}
 	
-	public String getCurrentType(){
+	public Type getCurrentType(){
 		if(getCurrentValue() instanceof Integer){
-			return "int";
+			return Type.IntType;
 		}else if(getCurrentValue() instanceof java.lang.Float){
-			return "float";
+			return Type.FloatType;
 		}else{
 			//Shouldnt come here
 			throw new RuntimeException("Type conversion error");

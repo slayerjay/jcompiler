@@ -8,8 +8,8 @@ import java.util.Hashtable;
 public class Lexer {
 
 	private InputStream reader;
-	private int line = 1;
-	private int cPos = 0;
+	private static int line = 1;
+	private static int cPos = 0;
 	private char peek = ' ';
 
 	private Hashtable<String, Id> words = new Hashtable<String, Id>();
@@ -108,11 +108,11 @@ public class Lexer {
 		cPos++;
 	}
 
-	public int getCurrentLine() {
+	public static int getCurrentLine() {
 		return line;
 	}
 
-	public int getCurrentPosition() {
+	public static int getCurrentPosition() {
 		return cPos;
 	}
 

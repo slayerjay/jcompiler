@@ -21,6 +21,13 @@ package com.janithw.jcompiler.parser;
 
 import java.io.IOException;
 
+import com.janithw.jcompiler.inter.Arith;
+import com.janithw.jcompiler.inter.Constant;
+import com.janithw.jcompiler.inter.Expr;
+import com.janithw.jcompiler.inter.List;
+import com.janithw.jcompiler.inter.Node;
+import com.janithw.jcompiler.inter.Set;
+import com.janithw.jcompiler.inter.Stmt;
 import com.janithw.jcompiler.lexer.Id;
 import com.janithw.jcompiler.lexer.Lexer;
 import com.janithw.jcompiler.lexer.Tag;
@@ -71,10 +78,11 @@ public class Parser {
 		System.out.println("Warning: Line: " + scanner.getCurrentLine()
 				+ " Col: " + scanner.getCurrentPosition() + ": " + string);
 	}
-
+	
 	public void P() throws IOException {
 		D();
-		L();
+		List l = L();
+		l.gen();
 	}
 
 	private void D() throws IOException {
@@ -101,8 +109,8 @@ public class Parser {
 	}
 
 	private void N(Type type) throws IOException {
-		((Id) lookahead).setType(type.getLexeme());
-		env.put(lookahead, (Id) lookahead);
+		((Id) lookahead).setType(type);
+		env.put(lookahead, new com.janithw.jcompiler.inter.Id((Id) lookahead));
 		match(Tag.ID);
 		N1(type);
 	}
@@ -110,8 +118,8 @@ public class Parser {
 	private void N1(Type type) throws IOException {
 		if (lookahead.tag() == ',') {
 			match(',');
-			((Id) lookahead).setType(type.getLexeme());
-			env.put(lookahead, (Id) lookahead);
+			((Id) lookahead).setType(type);
+			env.put(lookahead, new com.janithw.jcompiler.inter.Id((Id) lookahead));
 			match(Tag.ID);
 			N1(type);
 		} else {
@@ -130,20 +138,22 @@ public class Parser {
 
 	}
 
-	private void L() throws IOException {
-		S();
+	private List L() throws IOException {
+		Stmt s = S();
 		match(';');
-		L1();
+		Stmt l1 = L1();
+		return new List(s, l1);
 	}
 
-	private void S() throws IOException {
+	private Stmt S() throws IOException {
 		postfixBuffer = new StringBuffer();
 		stackMachine = new StackMachine();
+		Stmt stmtNode = Stmt.Null;
 		if (lookahead.tag() == Tag.ID) {
 			Id id = (Id) lookahead;
 			match(Tag.ID);
 			match('=');
-			E();
+			Expr expr = E();
 			if (!id.getType().equals(stackMachine.getCurrentType())) {
 				if ("int".equals(id.getType())) { // id is int, trying to assign
 													// float
@@ -154,86 +164,101 @@ public class Parser {
 			}
 			id.setVal(stackMachine.getCurrentValue(),
 					stackMachine.getCurrentType());
+			stmtNode = new Set(env.get(id), expr);
 		} else if (lookahead.tag() == '(' || lookahead.tag() == Tag.INT
 				|| lookahead.tag() == Tag.FLOAT) {
-			E();
+			stmtNode = new Stmt(E());
 		} else {
 			error("Syntax Error");
 		}
 		System.out.println(postfixBuffer.toString());
+		//stmtNode.gen();
+		return stmtNode;
 	}
 
-	private void L1() throws IOException {
+	private Stmt L1() throws IOException {
+		Stmt stmts = null;
 		if (lookahead.tag() == Tag.ID || lookahead.tag() == '('
 				|| lookahead.tag() == Tag.INT || lookahead.tag() == Tag.FLOAT) {
-			L();
+			stmts = L();
 		} else {
-
+			stmts = Stmt.Null;
 		}
+		return stmts;
 	}
 
-	private void E() throws IOException {
-		T();
-		E1();
+	private Expr E() throws IOException {
+		Expr t = T();
+		return E1(t);
 	}
 
-	private void T() throws IOException {
-		F();
-		T1();
+	private Expr T() throws IOException {
+		Expr f = F();
+		return T1(f);
 	}
 
-	private void F() throws IOException {
+	private Expr F() throws IOException {
+		Expr expr = null;
 		switch (lookahead.tag()) {
 		case '(':
 			match('(');
-			E();
+			expr = E();
 			match(')');
 			break;
 		case Tag.INT:
 			postfixBuffer.append(lookahead);
 			stackMachine.push(lookahead);
+			expr = new Constant(lookahead, Type.IntType);
 			match(Tag.INT);
 			break;
 		case Tag.FLOAT:
 			postfixBuffer.append(lookahead);
 			stackMachine.push(lookahead);
+			expr = new Constant(lookahead, Type.FloatType);
 			match(Tag.FLOAT);
 			break;
 		case Tag.ID:
 			postfixBuffer.append(lookahead);
 			stackMachine.push(lookahead);
+			expr = env.get(lookahead);
 			match(Tag.ID);
 			break;
 		default:
 			error("Syntax Error");
 		}
-
+		return expr;
 	}
 
-	private void T1() throws IOException {
+	private Expr T1(Expr inhF) throws IOException {
+		Expr term = null;
 		if (lookahead.tag() == '*') {
+			Token op = lookahead;
 			match('*');
-			F();
+			Expr f = F();
 			postfixBuffer.append('*');
 			stackMachine.evaluate('*');
-			T1();
+			Expr term1 = new Arith(op, inhF, f);
+			term = T1(term1);
 		} else {
-
+			term = inhF;
 		}
-
+		return term;
 	}
 
-	private void E1() throws IOException {
+	private Expr E1(Expr inhT) throws IOException {
+		Expr expr = null;
 		if (lookahead.tag() == '+') {
+			Token op = lookahead;
 			match('+');
-			T();
+			Expr t = T();
 			postfixBuffer.append('+');
 			stackMachine.evaluate('+');
-			T1();
+			Expr exp1 = new Arith(op, inhT, t);
+			expr = E1(exp1);
 		} else {
-
+			expr = inhT;
 		}
-
+		return expr;
 	}
 
 	public Env getEnv() {

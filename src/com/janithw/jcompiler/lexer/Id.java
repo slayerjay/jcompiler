@@ -4,7 +4,7 @@ public class Id extends Token implements ValuedToken{
 
 	private final String lexeme;
 	private Object val;
-	private String type;
+	private Type type;
 
 	public Id(int t, String lexeme) {
 		super(t);
@@ -19,11 +19,11 @@ public class Id extends Token implements ValuedToken{
 		return val;
 	}
 
-	public void setType(String type) {
+	public void setType(Type type) {
 		this.type = type;
 	}
 
-	public void setVal(Object val, String type) {
+	public void setVal(Object val, Type type) {
 		this.val = val;
 		this.type = type;
 	}
@@ -34,7 +34,7 @@ public class Id extends Token implements ValuedToken{
 	}
 
 	@Override
-	public String getType() {
+	public Type getType() {
 		return type;
 	}
 
