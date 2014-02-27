@@ -21,11 +21,11 @@ package com.janithw.jcompiler.parser;
 
 import java.io.IOException;
 
+import com.janithw.jcompiler.error.ErrorHandler;
 import com.janithw.jcompiler.inter.Arith;
 import com.janithw.jcompiler.inter.Constant;
 import com.janithw.jcompiler.inter.Expr;
 import com.janithw.jcompiler.inter.List;
-import com.janithw.jcompiler.inter.Node;
 import com.janithw.jcompiler.inter.Set;
 import com.janithw.jcompiler.inter.Stmt;
 import com.janithw.jcompiler.lexer.Id;
@@ -64,25 +64,14 @@ public class Parser {
 		if (lookahead.tag() == t) {
 			scanNext();
 		} else {
-			error("Syntax Error");
+			ErrorHandler.parsingError(ErrorHandler.Syntax);
 		}
 	}
 
-	private void error(String string) {
-		System.err.println("Error: Line: " + scanner.getCurrentLine()
-				+ " Col: " + scanner.getCurrentPosition() + ": " + string);
-		System.exit(1);
-	}
-
-	private void warn(String string) {
-		System.out.println("Warning: Line: " + scanner.getCurrentLine()
-				+ " Col: " + scanner.getCurrentPosition() + ": " + string);
-	}
-	
-	public void P() throws IOException {
+	public List P() throws IOException {
 		D();
 		List l = L();
-		l.gen();
+		return l;
 	}
 
 	private void D() throws IOException {
@@ -90,7 +79,6 @@ public class Parser {
 		N(type);
 		match(';');
 		D1();
-
 	}
 
 	private Type B() throws IOException {
@@ -102,7 +90,7 @@ public class Parser {
 			type = (Type) lookahead;
 			match(Tag.FLOAT_KEYWORD);
 		} else {
-			error("Syntax Error");
+			ErrorHandler.parsingError(ErrorHandler.Syntax);
 		}
 		return type;
 
@@ -119,7 +107,8 @@ public class Parser {
 		if (lookahead.tag() == ',') {
 			match(',');
 			((Id) lookahead).setType(type);
-			env.put(lookahead, new com.janithw.jcompiler.inter.Id((Id) lookahead));
+			env.put(lookahead, new com.janithw.jcompiler.inter.Id(
+					(Id) lookahead));
 			match(Tag.ID);
 			N1(type);
 		} else {
@@ -133,9 +122,7 @@ public class Parser {
 				|| lookahead.tag() == Tag.FLOAT_KEYWORD) {
 			D();
 		} else {
-
 		}
-
 	}
 
 	private List L() throws IOException {
@@ -157,9 +144,9 @@ public class Parser {
 			if (!id.getType().equals(stackMachine.getCurrentType())) {
 				if ("int".equals(id.getType())) { // id is int, trying to assign
 													// float
-					error("Type mismatch (Narrowing conversion) float to int");
+					ErrorHandler.parsingError(ErrorHandler.Narrowing);
 				} else { // id is float, trying to assign int.
-					warn("Type mismatch (Widening conversion) int to float");
+					ErrorHandler.parsingWarning(ErrorHandler.Widening);
 				}
 			}
 			id.setVal(stackMachine.getCurrentValue(),
@@ -169,10 +156,9 @@ public class Parser {
 				|| lookahead.tag() == Tag.FLOAT) {
 			stmtNode = new Stmt(E());
 		} else {
-			error("Syntax Error");
+			ErrorHandler.parsingError(ErrorHandler.Syntax);
 		}
 		System.out.println(postfixBuffer.toString());
-		//stmtNode.gen();
 		return stmtNode;
 	}
 
@@ -224,7 +210,7 @@ public class Parser {
 			match(Tag.ID);
 			break;
 		default:
-			error("Syntax Error");
+			ErrorHandler.parsingError(ErrorHandler.Syntax);
 		}
 		return expr;
 	}
@@ -264,7 +250,5 @@ public class Parser {
 	public Env getEnv() {
 		return env;
 	}
-	
-	
 
 }

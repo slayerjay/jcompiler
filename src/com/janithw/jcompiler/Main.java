@@ -2,6 +2,7 @@ package com.janithw.jcompiler;
 
 import java.io.IOException;
 
+import com.janithw.jcompiler.inter.List;
 import com.janithw.jcompiler.lexer.Lexer;
 import com.janithw.jcompiler.lexer.Token;
 import com.janithw.jcompiler.parser.Parser;
@@ -16,13 +17,11 @@ public class Main {
 		// TODO Auto-generated method stub
 		Lexer scanner = new Lexer(System.in);
 		Parser parser = new Parser(scanner);
-		parser.P();
+		List code = parser.P();
 		System.out.println(parser.getEnv());
-//		
-//		while(true){
-//			Token nextToken = scanner.scan();
-//			System.out.println(nextToken);
-//		}
+		System.out.println("Three Address Code: ");
+		code.gen();
+
 		
 	}
 
