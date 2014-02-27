@@ -15,7 +15,10 @@ public class Stmt extends Node {
 
 	public void gen() {
 		if(expr!=null){
-			expr.gen();
+			Expr gen = expr.gen();
+			if(gen instanceof Arith){
+				((Arith)gen).reduce();
+			}
 		}
 	}
 
