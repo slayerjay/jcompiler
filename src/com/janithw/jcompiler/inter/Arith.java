@@ -10,13 +10,17 @@ public class Arith extends Op {
 		super(op, null);
 		expr1 = x1;
 		expr2 = x2;
-//		type = Type.max(expr1.type, expr2.type);
-//		if (type == null)
-//			error("type error");
+		type = max(expr1.type, expr2.type);
+		if (type == null)
+			error("type error");
 	}
 
 	public Expr gen() {
-		return new Arith(super.getToken(), expr1.reduce(), expr2.reduce());
+		Expr e1 = expr1.reduce();
+		Expr e2 = expr2.reduce();
+		Expr a1 = widen(e1, e1.getType(), type);
+		Expr a2 = widen(e2, e2.getType(), type);
+		return new Arith(super.getToken(), a1, a2);
 	}
 
 	public String toString() {
