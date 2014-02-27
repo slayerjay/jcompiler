@@ -27,18 +27,22 @@ public class Lexer {
 	public Token scan() throws IOException {
 		//Skip white space
 		do {
-			readNext();
+			
 			if (peek == ' ' || peek == '\t') {
+				readNext();
 				continue;
 			} else if (peek == '\n') {
 				line++;
 				cPos = 0;
+				readNext();
 				continue;
-			} /*else if (peek == '\r') {
+			} else if (peek == '\r') {
+				readNext();
 				continue;
-			} */else {
+			} else {
 				break;
 			}
+			
 		} while (peek!=-1);
 
 		//Handle numbers
