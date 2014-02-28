@@ -16,11 +16,14 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		FileInputStream in = new FileInputStream(new File("tests\\test1.txt"));
+		FileInputStream in = new FileInputStream(new File("tests\\test.txt"));
 		Lexer scanner = new Lexer(in);
 		Parser parser = new Parser(scanner);
 		List code = parser.P();
+		System.out.println();
+		System.out.println("-------------------------");
 		System.out.println(parser.getEnv());
+		
 		System.out.println("Three Address Code: ");
 		code.gen();
 	}

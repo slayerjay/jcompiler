@@ -142,7 +142,7 @@ public class Parser {
 			match('=');
 			Expr expr = E();
 			if (!id.getType().equals(stackMachine.getCurrentType())) {
-				if ("int".equals(id.getType())) { // id is int, trying to assign
+				if ("int".equals(id.getType().toString())) { // id is int, trying to assign
 													// float
 					ErrorHandler.parsingError(ErrorHandler.Narrowing);
 				} else { // id is float, trying to assign int.
@@ -158,7 +158,10 @@ public class Parser {
 		} else {
 			ErrorHandler.parsingError(ErrorHandler.Syntax);
 		}
-		System.out.println(postfixBuffer.toString());
+		System.out.println("Line: "+Lexer.getCurrentLine());
+		System.out.println("----------------------------------------------------");
+		System.out.println("Postfix notation: "+ postfixBuffer.toString());
+		System.out.println("Evaluated Result: "+ stackMachine.getCurrentValue());
 		return stmtNode;
 	}
 
