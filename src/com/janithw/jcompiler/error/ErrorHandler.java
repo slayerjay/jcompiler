@@ -9,9 +9,8 @@ public class ErrorHandler {
 	public static final String Syntax = "Syntax error";
 	
 	public static void parsingError(String message){
-		System.err.println("Parse Error on Line: " + Lexer.getCurrentLine()
+		throw new CompilerException("Parse Error on Line: " + Lexer.getCurrentLine()
 				+ " Col: " + Lexer.getCurrentPosition() + ": " + message);
-		System.exit(1);
 	}
 	
 	public static void parsingWarning(String message){
@@ -19,3 +18,5 @@ public class ErrorHandler {
 				+ " Col: " + Lexer.getCurrentPosition() + ": " + message);
 	}
 }
+
+

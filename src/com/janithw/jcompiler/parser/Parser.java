@@ -42,11 +42,17 @@ public class Parser {
 
 	private Token lookahead;
 
+	private Token current;
+	
+	private Token next;
+	
 	private StringBuffer postfixBuffer;
 
 	private StackMachine stackMachine;
 
 	private Env env;
+	
+	private boolean skipNext = false;
 
 	public Parser(Lexer scanner) throws IOException {
 		this.scanner = scanner;
@@ -61,9 +67,12 @@ public class Parser {
 	}
 
 	private void match(int t) throws IOException {
-		if (lookahead.tag() == t) {
+		if (lookahead.tag() == t && !skipNext) {
 			scanNext();
-		} else {
+		} else if(skipNext){
+			lookahead = next;
+			skipNext = false;
+		}else {
 			ErrorHandler.parsingError(ErrorHandler.Syntax);
 		}
 	}
@@ -136,32 +145,45 @@ public class Parser {
 		postfixBuffer = new StringBuffer();
 		stackMachine = new StackMachine();
 		Stmt stmtNode = Stmt.Null;
-		if (lookahead.tag() == Tag.ID) {
-			Id id = (Id) lookahead;
-			match(Tag.ID);
-			match('=');
-			Expr expr = E();
-			if (!id.getType().equals(stackMachine.getCurrentType())) {
-				if ("int".equals(id.getType().toString())) { // id is int, trying to assign
-													// float
-					ErrorHandler.parsingError(ErrorHandler.Narrowing);
-				} else { // id is float, trying to assign int.
-					ErrorHandler.parsingWarning(ErrorHandler.Widening);
-				}
-			}
-			id.setVal(stackMachine.getCurrentValue(),
-					stackMachine.getCurrentType());
-			stmtNode = new Set(env.get(id), expr);
-		} else if (lookahead.tag() == '(' || lookahead.tag() == Tag.INT
+		if (lookahead.tag() == '(' || lookahead.tag() == Tag.INT
 				|| lookahead.tag() == Tag.FLOAT) {
 			stmtNode = new Stmt(E());
+		} else if (lookahead.tag() == Tag.ID) {
+			current = lookahead;
+			Id id = (Id) lookahead;
+			match(Tag.ID);
+			if(lookahead.tag() == '='){
+				match('=');
+				Expr expr = E();
+				if (!id.getType().equals(stackMachine.getCurrentType())) {
+					if ("int".equals(id.getType().toString())) { // id is int,
+																	// trying to
+																	// assign
+						// float
+						ErrorHandler.parsingError(ErrorHandler.Narrowing);
+					} else { // id is float, trying to assign int.
+						ErrorHandler.parsingWarning(ErrorHandler.Widening);
+					}
+				}
+				id.setVal(stackMachine.getCurrentValue(),
+						stackMachine.getCurrentType());
+				stmtNode = new Set(env.get(id), expr);
+			} else {
+				next = lookahead;
+				lookahead = current;
+				skipNext = true;
+				stmtNode = new Stmt(E());
+			}
+
 		} else {
 			ErrorHandler.parsingError(ErrorHandler.Syntax);
 		}
-		System.out.println("Line: "+Lexer.getCurrentLine());
-		System.out.println("----------------------------------------------------");
-		System.out.println("Postfix notation: "+ postfixBuffer.toString());
-		System.out.println("Evaluated Result: "+ stackMachine.getCurrentValue());
+		System.out.println("Line: " + Lexer.getCurrentLine());
+		System.out
+				.println("----------------------------------------------------");
+		System.out.println("Postfix notation: " + postfixBuffer.toString());
+		System.out.println("Evaluated Result: "
+				+ stackMachine.getCurrentValue());
 		return stmtNode;
 	}
 
